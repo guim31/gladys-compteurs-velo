@@ -1,177 +1,619 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Compteurs vélo",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Bike counters of French cities in open data: passages per day and per week, records, late data.",
+    "fr": "Compteurs vélo des villes françaises en open data : passages par jour et par semaine, records.",
+    "de": "Fahrradzähler französischer Städte (Open Data): Durchfahrten pro Tag und Woche, Rekorde.",
+    "es": "Contadores de bicis de ciudades francesas (datos abiertos): pasos por día y semana, récords."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
-  "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "docker_image": "ghcr.io/guim31/gladys-compteurs-velo:1.0.0",
+  "gladys_version": ">=5.3.0",
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-compteurs-velo/main/cover.png",
+  "categories": ["services"],
+  "countries": ["FR"],
+  "transports": ["cloud"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "How it works",
+        "fr": "Fonctionnement",
+        "de": "So funktioniert es",
+        "es": "Funcionamiento"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Tick your cities and save: their bike counters appear in the Discover tab. Add the ones you want to Gladys. No account, no key. The cities publish once a day: figures are from the day before or earlier.",
+        "fr": "Cochez vos villes et enregistrez : leurs compteurs vélo apparaissent dans l'onglet Découverte. Ajoutez ceux qui vous intéressent à Gladys. Sans compte ni clé. Les villes publient une fois par jour : les chiffres datent de la veille ou d'avant.",
+        "de": "Kreuze deine Städte an und speichere: ihre Fahrradzähler erscheinen im Tab „Entdecken“. Füge die gewünschten zu Gladys hinzu. Kein Konto, kein Schlüssel. Die Städte veröffentlichen einmal am Tag: die Zahlen sind vom Vortag oder älter.",
+        "es": "Marque sus ciudades y guarde: sus contadores de bicis aparecen en la pestaña Descubrir. Añada a Gladys los que le interesen. Sin cuenta ni clave. Las ciudades publican una vez al día: las cifras son del día anterior o más antiguas."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/guim31/gladys-compteurs-velo/blob/main/docs/en.md",
+          "label": {
+            "en": "Setup guide",
+            "fr": "Guide de configuration",
+            "de": "Einrichtungsanleitung",
+            "es": "Guía de configuración"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "cities",
+      "type": "multi_select",
+      "label": {
+        "en": "Cities",
+        "fr": "Villes",
+        "de": "Städte",
+        "es": "Ciudades"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
       "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+        "en": "Bike counters published every day in open data. Others: see the guide.",
+        "fr": "Compteurs vélo publiés chaque jour en open data. Autres villes : voir le guide.",
+        "de": "Täglich als Open Data veröffentlichte Fahrradzähler. Andere Städte: siehe Anleitung.",
+        "es": "Contadores de bicis publicados cada día en datos abiertos. Otras ciudades: vea la guía."
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
-      "required": false,
-      "default": "celsius",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
+        {
+          "value": "paris",
+          "label": {
+            "en": "Paris",
+            "fr": "Paris",
+            "de": "Paris",
+            "es": "París"
+          }
+        },
+        {
+          "value": "nantes",
+          "label": {
+            "en": "Nantes Métropole",
+            "fr": "Nantes Métropole",
+            "de": "Nantes Métropole",
+            "es": "Nantes Métropole"
+          }
+        },
+        {
+          "value": "tours",
+          "label": {
+            "en": "Tours Métropole",
+            "fr": "Tours Métropole",
+            "de": "Tours Métropole",
+            "es": "Tours Métropole"
+          }
+        },
+        {
+          "value": "saint_nazaire",
+          "label": {
+            "en": "Saint-Nazaire area (CARENE)",
+            "fr": "Saint-Nazaire agglo (CARENE)",
+            "de": "Großraum Saint-Nazaire (CARENE)",
+            "es": "Área de Saint-Nazaire (CARENE)"
+          }
+        },
+        {
+          "value": "hauts_de_seine",
+          "label": {
+            "en": "Hauts-de-Seine (departmental roads)",
+            "fr": "Hauts-de-Seine (routes départementales)",
+            "de": "Hauts-de-Seine (Departementsstraßen)",
+            "es": "Hauts-de-Seine (carreteras departamentales)"
+          }
+        }
+      ],
+      "default": []
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
-      "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms",
+        "de": "Sprache der Namen",
+        "es": "Idioma de los nombres"
       },
-      "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "description": {
+        "en": "Feature names (frozen when a counter is added) and sentences of the scenes.",
+        "fr": "Noms des fonctionnalités (figés à l'ajout d'un compteur) et phrases des scènes.",
+        "de": "Namen der Funktionen (beim Hinzufügen festgelegt) und Sätze der Szenen.",
+        "es": "Nombres de las funciones (fijados al añadir un contador) y frases de las escenas."
+      },
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ],
+      "default": "fr"
+    },
+    {
+      "key": "refresh_interval",
+      "type": "select",
+      "label": {
+        "en": "Reading interval",
+        "fr": "Intervalle de lecture",
+        "de": "Abfrageintervall",
+        "es": "Intervalo de lectura"
+      },
+      "description": {
+        "en": "How often the portals are read. They publish once a day, in the morning.",
+        "fr": "Fréquence de lecture des portails. Ils publient une fois par jour, le matin.",
+        "de": "Wie oft die Portale abgefragt werden. Diese veröffentlichen einmal am Tag, morgens.",
+        "es": "Frecuencia de lectura de los portales. Publican una vez al día, por la mañana."
+      },
+      "options": [
+        {
+          "value": "1800",
+          "label": {
+            "en": "30 minutes",
+            "fr": "30 minutes",
+            "de": "30 Minuten",
+            "es": "30 minutos"
+          }
+        },
+        {
+          "value": "3600",
+          "label": {
+            "en": "1 hour",
+            "fr": "1 heure",
+            "de": "1 Stunde",
+            "es": "1 hora"
+          }
+        },
+        {
+          "value": "10800",
+          "label": {
+            "en": "3 hours",
+            "fr": "3 heures",
+            "de": "3 Stunden",
+            "es": "3 horas"
+          }
+        }
+      ],
+      "default": "3600"
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "status",
+      "label": {
+        "en": "Status",
+        "fr": "État",
+        "de": "Status",
+        "es": "Estado"
+      },
+      "description": {
+        "en": "Cities read, counters, last complete day, last readings and errors.",
+        "fr": "Villes lues, compteurs, dernière journée complète, dernières lectures et erreurs.",
+        "de": "Gelesene Städte, Zähler, letzter vollständiger Tag, letzte Abfragen und Fehler.",
+        "es": "Ciudades leídas, contadores, último día completo, últimas lecturas y errores."
+      },
+      "timeout_seconds": 30,
+      "fields": []
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "daily_record",
+      "label": {
+        "en": "Daily record beaten",
+        "fr": "Record journalier battu",
+        "de": "Tagesrekord gebrochen",
+        "es": "Récord diario batido"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "A complete day of a watched counter beats its best day so far (history available in the source).",
+        "fr": "Une journée complète d'un compteur suivi bat sa meilleure journée connue (historique disponible dans la source).",
+        "de": "Ein vollständiger Tag eines überwachten Zählers übertrifft seinen bisher besten Tag (Verlauf der Quelle).",
+        "es": "Un día completo de un contador vigilado supera su mejor día conocido (historial disponible en la fuente)."
       },
       "fields": [
         {
-          "key": "device",
-          "type": "select",
+          "key": "counter",
+          "type": "multi_select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "required": false,
+          "label": {
+            "en": "Counters",
+            "fr": "Compteurs",
+            "de": "Zähler",
+            "es": "Contadores"
+          },
+          "description": {
+            "en": "Empty: any watched counter.",
+            "fr": "Vide : n'importe quel compteur suivi.",
+            "de": "Leer: jeder überwachte Zähler.",
+            "es": "Vacío: cualquier contador vigilado."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "counter_name",
+          "type": "string",
+          "label": {
+            "en": "Counter",
+            "fr": "Compteur",
+            "de": "Zähler",
+            "es": "Contador"
+          }
         },
         {
-          "key": "target",
+          "key": "city",
+          "type": "string",
+          "label": {
+            "en": "City",
+            "fr": "Ville",
+            "de": "Stadt",
+            "es": "Ciudad"
+          }
+        },
+        {
+          "key": "count",
+          "type": "number",
+          "label": {
+            "en": "Passages of the day",
+            "fr": "Passages de la journée",
+            "de": "Durchfahrten des Tages",
+            "es": "Pasos del día"
+          }
+        },
+        {
+          "key": "day",
+          "type": "string",
+          "label": {
+            "en": "Day (YYYY-MM-DD)",
+            "fr": "Jour (AAAA-MM-JJ)",
+            "de": "Tag (JJJJ-MM-TT)",
+            "es": "Día (AAAA-MM-DD)"
+          }
+        },
+        {
+          "key": "previous_record",
+          "type": "number",
+          "label": {
+            "en": "Previous record",
+            "fr": "Record précédent",
+            "de": "Bisheriger Rekord",
+            "es": "Récord anterior"
+          }
+        },
+        {
+          "key": "previous_record_day",
+          "type": "string",
+          "label": {
+            "en": "Day of the previous record",
+            "fr": "Jour du record précédent",
+            "de": "Tag des bisherigen Rekords",
+            "es": "Día del récord anterior"
+          }
+        }
+      ]
+    },
+    {
+      "key": "counter_late",
+      "label": {
+        "en": "Counter data late",
+        "fr": "Données d'un compteur en retard",
+        "de": "Zählerdaten verspätet",
+        "es": "Datos de un contador con retraso"
+      },
+      "description": {
+        "en": "The data of a watched counter is late by the chosen delay, beyond the usual delay of its city.",
+        "fr": "Les données d'un compteur suivi ont le retard choisi, au-delà du délai habituel de sa ville.",
+        "de": "Die Daten eines überwachten Zählers sind um die gewählte Zeit verspätet, über die übliche Verzögerung seiner Stadt hinaus.",
+        "es": "Los datos de un contador vigilado llevan el retraso elegido, más allá del plazo habitual de su ciudad."
+      },
+      "fields": [
+        {
+          "key": "counter",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "source": "devices",
+          "required": false,
+          "label": {
+            "en": "Counters",
+            "fr": "Compteurs",
+            "de": "Zähler",
+            "es": "Contadores"
+          },
+          "description": {
+            "en": "Empty: any watched counter.",
+            "fr": "Vide : n'importe quel compteur suivi.",
+            "de": "Leer: jeder überwachte Zähler.",
+            "es": "Vacío: cualquier contador vigilado."
+          }
+        },
+        {
+          "key": "hours",
+          "type": "select",
+          "required": true,
+          "label": {
+            "en": "Delay",
+            "fr": "Retard",
+            "de": "Verspätung",
+            "es": "Retraso"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "12",
+              "label": {
+                "en": "12 hours",
+                "fr": "12 heures",
+                "de": "12 Stunden",
+                "es": "12 horas"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "1 day",
+                "fr": "1 jour",
+                "de": "1 Tag",
+                "es": "1 día"
+              }
+            },
+            {
+              "value": "72",
+              "label": {
+                "en": "3 days",
+                "fr": "3 jours",
+                "de": "3 Tage",
+                "es": "3 días"
+              }
+            },
+            {
+              "value": "168",
+              "label": {
+                "en": "1 week",
+                "fr": "1 semaine",
+                "de": "1 Woche",
+                "es": "1 semana"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "counter_name",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Counter",
+            "fr": "Compteur",
+            "de": "Zähler",
+            "es": "Contador"
+          }
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "label": {
+            "en": "City",
+            "fr": "Ville",
+            "de": "Stadt",
+            "es": "Ciudad"
+          }
+        },
+        {
+          "key": "age_hours",
+          "type": "number",
+          "label": {
+            "en": "Data age (hours)",
+            "fr": "Âge de la donnée (heures)",
+            "de": "Alter der Daten (Stunden)",
+            "es": "Antigüedad del dato (horas)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
+      "key": "get_counts",
+      "label": {
+        "en": "Get the figures of a bike counter",
+        "fr": "Lire les chiffres d'un compteur vélo",
+        "de": "Zahlen eines Fahrradzählers abrufen",
+        "es": "Leer las cifras de un contador de bicis"
+      },
       "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+        "en": "Last complete day, last 7 days and trend of a watched counter, with a sentence ready to send.",
+        "fr": "Dernière journée complète, 7 derniers jours et tendance d'un compteur suivi, avec une phrase prête à envoyer.",
+        "de": "Letzter vollständiger Tag, letzte 7 Tage und Trend eines überwachten Zählers, mit einem fertigen Satz.",
+        "es": "Último día completo, últimos 7 días y tendencia de un contador vigilado, con una frase lista para enviar."
       },
       "timeout_seconds": 15,
       "fields": [
         {
-          "key": "device",
+          "key": "counter",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "required": true,
+          "label": {
+            "en": "Counter",
+            "fr": "Compteur",
+            "de": "Zähler",
+            "es": "Contador"
+          }
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "found",
+          "type": "number",
+          "label": {
+            "en": "Complete day known (1 = yes, 0 = no)",
+            "fr": "Journée complète connue (1 = oui, 0 = non)",
+            "de": "Vollständiger Tag bekannt (1 = ja, 0 = nein)",
+            "es": "Día completo conocido (1 = sí, 0 = no)"
+          }
+        },
+        {
+          "key": "sentence",
+          "type": "string",
+          "label": {
+            "en": "Sentence",
+            "fr": "Phrase",
+            "de": "Satz",
+            "es": "Frase"
+          }
+        },
+        {
+          "key": "counter_name",
+          "type": "string",
+          "label": {
+            "en": "Counter",
+            "fr": "Compteur",
+            "de": "Zähler",
+            "es": "Contador"
+          }
+        },
+        {
+          "key": "city",
+          "type": "string",
+          "label": {
+            "en": "City",
+            "fr": "Ville",
+            "de": "Stadt",
+            "es": "Ciudad"
+          }
+        },
+        {
+          "key": "last_day",
+          "type": "number",
+          "label": {
+            "en": "Passages of the last complete day",
+            "fr": "Passages de la dernière journée complète",
+            "de": "Durchfahrten des letzten vollständigen Tages",
+            "es": "Pasos del último día completo"
+          }
+        },
+        {
+          "key": "last_day_date",
+          "type": "string",
+          "label": {
+            "en": "Last complete day (YYYY-MM-DD)",
+            "fr": "Dernière journée complète (AAAA-MM-JJ)",
+            "de": "Letzter vollständiger Tag (JJJJ-MM-TT)",
+            "es": "Último día completo (AAAA-MM-DD)"
+          }
+        },
+        {
+          "key": "week",
+          "type": "number",
+          "label": {
+            "en": "Passages of the last 7 days",
+            "fr": "Passages des 7 derniers jours",
+            "de": "Durchfahrten der letzten 7 Tage",
+            "es": "Pasos de los últimos 7 días"
+          }
+        },
+        {
+          "key": "trend",
+          "type": "number",
+          "label": {
+            "en": "Trend vs. the week before (%)",
+            "fr": "Tendance sur la semaine d'avant (%)",
+            "de": "Trend zur Vorwoche (%)",
+            "es": "Tendencia frente a la semana anterior (%)"
+          }
+        },
+        {
+          "key": "hours_late",
+          "type": "number",
+          "label": {
+            "en": "Hours late (0 = on time)",
+            "fr": "Heures de retard (0 = à l'heure)",
+            "de": "Stunden Verspätung (0 = pünktlich)",
+            "es": "Horas de retraso (0 = a tiempo)"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
+      "key": "counters",
+      "label": {
+        "en": "Bike counters",
+        "fr": "Compteurs vélo",
+        "de": "Fahrradzähler",
+        "es": "Contadores de bicis"
+      },
       "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+        "en": "Passages of your counters the day before, trend and a 7-day chart.",
+        "fr": "Passages de vos compteurs la veille, tendance et courbe sur 7 jours.",
+        "de": "Durchfahrten deiner Zähler am Vortag, Trend und 7-Tage-Diagramm.",
+        "es": "Pasos de sus contadores el día anterior, tendencia y gráfico de 7 días."
       },
       "icon": "activity",
-      "action_timeout_seconds": 15
+      "settings": [
+        {
+          "key": "counters",
+          "type": "multi_select",
+          "source": "devices",
+          "required": false,
+          "label": {
+            "en": "Counters shown",
+            "fr": "Compteurs affichés",
+            "de": "Angezeigte Zähler",
+            "es": "Contadores mostrados"
+          },
+          "description": {
+            "en": "Empty: every watched counter (10 at most, 4 in the chart).",
+            "fr": "Vide : tous les compteurs suivis (10 au plus, 4 sur la courbe).",
+            "de": "Leer: alle überwachten Zähler (höchstens 10, 4 im Diagramm).",
+            "es": "Vacío: todos los contadores vigilados (10 como máximo, 4 en el gráfico)."
+          }
+        },
+        {
+          "key": "hide_chart",
+          "type": "boolean",
+          "required": false,
+          "label": {
+            "en": "Hide the chart",
+            "fr": "Masquer la courbe",
+            "de": "Diagramm ausblenden",
+            "es": "Ocultar el gráfico"
+          }
+        }
+      ]
     }
   ]
 }

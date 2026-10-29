@@ -1,0 +1,149 @@
+# Contadores de bicis
+
+Los **contadores de bicis** que las ciudades francesas publican en datos abiertos, en Gladys:
+cuántos ciclistas pasaron ayer delante de «su» contador, en los últimos 7 días, y si fue un récord.
+París, Nantes Métropole, Tours Métropole, el área de Saint-Nazaire y las carreteras departamentales
+de Hauts-de-Seine. **Sin cuenta ni clave.**
+
+Integración no oficial, sin relación con las ciudades, con Eco-Counter ni con los operadores de los
+contadores. No interviene ningún hardware: las cinco fuentes se comprobaron en directo el
+29/10/2026, sus comentarios son bienvenidos.
+
+## Qué obtiene
+
+- Un **dispositivo por contador** añadido (por sentido de circulación cuando la ciudad los separa):
+  pasos del último día completo, de los últimos 7 días, de hoy hasta ahora y de la última hora
+  disponible (según la ciudad), y la antigüedad del dato.
+- Un **widget** «Contadores de bicis»: sus contadores en una línea cada uno (último día completo y
+  tendencia en una semana), con un gráfico de 7 días.
+- Dos **disparadores de escena**: récord diario batido, datos de un contador con retraso.
+- Una **acción de escena**: las cifras de un contador, con una frase lista para enviar o decir.
+
+## Requisitos
+
+- Gladys Assistant **5.3.0** o posterior.
+- Acceso a Internet desde Gladys: los datos vienen de los portales de datos abiertos de las
+  ciudades.
+- Sin cuenta ni clave de API.
+
+## Instalación
+
+1. En Gladys, abra **Integraciones → Instalar desde GitHub**.
+2. Pegue la dirección `https://github.com/guim31/gladys-compteurs-velo` y confirme.
+3. Abra la integración una vez instalada: aparece la pestaña **Configuración**.
+
+## Configuración
+
+### Ajustes
+
+| Ajuste                | Efecto                                                                     |
+| --------------------- | -------------------------------------------------------------------------- |
+| Ciudades              | las ciudades cuyos contadores se ofrecen en la pestaña Descubrir           |
+| Idioma de los nombres | idioma de los nombres de las funciones y de las frases de escena (francés) |
+| Intervalo de lectura  | cada 30 minutos, cada hora (por defecto) o cada 3 horas                    |
+
+Los nombres de las funciones se fijan al añadir un dispositivo: elija primero el idioma.
+
+### Añadir contadores
+
+1. Marque una o varias ciudades y guarde.
+2. Abra la pestaña **Descubrir**: cada contador de esas ciudades con datos en los últimos 17 días
+   aparece allí, como «Ciudad · Contador».
+3. Añada a Gladys los que le interesen. Sus valores llegan enseguida.
+
+Los contadores añadidos son los **contadores vigilados**: el widget, los disparadores y la acción de
+escena los ofrecen. Un contador añadido se sigue leyendo aunque desmarque su ciudad después.
+
+### Comprobar
+
+La acción **Estado** de la pestaña Configuración lista las ciudades leídas, su número de contadores,
+la hora de la última lectura, el último día completo y el último error si lo hay.
+
+## Dispositivos
+
+| Función                | Significado                                                       | Ciudades             |
+| ---------------------- | ----------------------------------------------------------------- | -------------------- |
+| Último día completo    | pasos del último día que la ciudad ha entregado entero            | todas                |
+| Últimos 7 días         | pasos de los 7 días que terminan con el último día completo       | todas                |
+| Hoy hasta ahora        | pasos del día en curso ya entregados (0 hasta los primeros datos) | Tours, Saint-Nazaire |
+| Última hora disponible | pasos de la última hora entregada                                 | París, Saint-Nazaire |
+| Antigüedad del dato    | horas desde el final de los últimos datos                         | todas                |
+
+**Un día nunca se muestra antes de estar completo**: las ciudades entregan una vez al día, y el día
+que se está entregando queda fuera de «Último día completo» y «Últimos 7 días». Un día que falta en
+la fuente no se inventa: los 7 días suman entonces solo seis.
+
+## Widget del panel
+
+«Contadores de bicis»: una línea por contador (10 como máximo), con los pasos del último día
+completo, «ayer» o su fecha, y la tendencia frente a la semana anterior («↗ 12 %»). En gris cuando
+los datos llevan retraso. Debajo, un gráfico de los 7 últimos días completos de los cuatro primeros
+contadores; un ajuste lo oculta. El widget muestra los nombres que usted dio en Gladys.
+
+## Disparadores de escena
+
+| Disparador                       | Se dispara cuando                                                                       |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
+| Récord diario batido             | un nuevo día completo supera el mejor día del contador (historial de la ciudad)         |
+| Datos de un contador con retraso | los datos llevan 12 h, 1 día, 3 días o 1 semana de retraso, más allá del plazo habitual |
+
+Ambos pueden limitarse a algunos contadores. Variables: contador, ciudad, pasos y día, récord
+anterior y su día; la antigüedad del dato para un contador con retraso. Un día marcado como dudoso
+por Nantes nunca es un récord.
+
+## Acción de escena
+
+**Leer las cifras de un contador de bicis**: pasos del último día completo y su fecha, de los
+últimos 7 días, la tendencia en % frente a la semana anterior (0 si se desconoce), las horas de
+retraso, y una frase como «Pont Wilson: 1934 bicis el 27 oct, 11.915 en 7 días.». «Día completo
+conocido» vale 0 mientras el contador no tenga todavía un día completo.
+
+## Ejemplos de escenas
+
+- Cada mañana a las 9: leer las cifras de su contador y enviar la frase por Telegram.
+- Récord diario batido: enviar un mensaje con el contador y sus pasos (variables de la escena).
+- Datos de un contador con 3 días de retraso: enviar un mensaje, el contador probablemente está
+  averiado.
+
+## Datos y actualización
+
+| Ciudad           | Portal                                    | Paso | Publicación                                           |
+| ---------------- | ----------------------------------------- | ---- | ----------------------------------------------------- |
+| París            | opendata.paris.fr (Opendatasoft)          | hora | cada mañana, hasta el día anterior                    |
+| Nantes Métropole | data.nantesmetropole.fr (Opendatasoft)    | día  | cada mañana, con dos días de desfase                  |
+| Tours Métropole  | data.tours-metropole.fr (Opendatasoft)    | día  | a media mañana, con el día en curso                   |
+| Saint-Nazaire    | data.saintnazaireagglo.fr (Opendatasoft)  | hora | cada mañana, hasta esa misma mañana                   |
+| Hauts-de-Seine   | opendata.hauts-de-seine.fr (Opendatasoft) | día  | cada noche; un día cuenta cuando ya está el siguiente |
+
+Así, el «Último día completo» suele ser ayer (París, Tours, Saint-Nazaire), anteayer
+(Hauts-de-Seine) o tres días antes (Nantes). Una petición agregada por ciudad y por lectura (una más
+para la última hora en París y Saint-Nazaire), y una vez por contador añadido el mejor día de su
+historial, guardado después en `/data`. Con una lectura por hora, son unas decenas de peticiones al
+día, muy por debajo de las cuotas de los portales para un uso anónimo.
+
+## Solución de problemas
+
+- **Ningún contador en Descubrir**: compruebe que hay una ciudad marcada y guardada, y luego lance
+  la acción **Estado**. Un error «HTTP 503» o «timeout» viene del portal de la ciudad: vuelva a
+  intentarlo más tarde.
+- **Los valores no cambian en todo el día**: es normal, las ciudades publican una vez al día.
+- **Una línea gris en el widget**: los datos de este contador llevan retraso (contador averiado o
+  ciudad con retraso).
+- Para más detalles, ajuste `LOG_LEVEL=debug`: cada lectura se registra entonces.
+
+## Limitaciones
+
+- **Toulouse** dejó de actualizar su conjunto Eco-Counter en junio de 2025, **Rennes** en julio de
+  2026; **Montpellier** no estaba disponible durante las pruebas; **Lille**, **Angers** y **Brest**
+  solo publican cifras anuales o de campaña; **Anglet** cambia de conjunto de datos cada año. Podrán
+  añadirse cuando exista un flujo diario.
+- Cifras tal como las publican las ciudades (recuentos brutos de Eco-Counter, a veces corregidos
+  después).
+- Solo lectura.
+
+## Créditos
+
+- Datos: Ville de Paris, Nantes Métropole, Syndicat des Mobilités de Touraine, Saint-Nazaire agglo
+  – La CARENE y Département des Hauts-de-Seine, bajo sus licencias abiertas (ODbL / Licence
+  Ouverte).
+- Construida a partir de la plantilla oficial de integración de Gladys.

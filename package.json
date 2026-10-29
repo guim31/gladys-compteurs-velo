@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-compteurs-velo",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Gladys Assistant integration: the bike counters published in open data by French cities (Paris, Nantes, Tours, Saint-Nazaire, Hauts-de-Seine).",
   "type": "module",
   "main": "index.js",
   "scripts": {
