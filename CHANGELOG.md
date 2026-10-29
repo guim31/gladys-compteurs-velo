@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-29
+
 ### Added
 
 - The bike counters published in open data by Paris, Nantes Métropole, Tours
@@ -25,3 +27,6 @@ the notes of the version's GitHub Release.
   action giving the figures of a counter with a sentence ready to send.
 - A "Status" action: cities read, last complete day, errors.
 - Texts and documentation in English, French, German and Spanish.
+
+[Unreleased]: https://github.com/guim31/gladys-compteurs-velo/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-compteurs-velo/releases/tag/v1.0.0
