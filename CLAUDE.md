@@ -296,3 +296,11 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
   par seuil franchi, jamais au premier passage (référence).
 - Le widget utilise un `chart` : `gladys_version >=5.2.0` (et `countries` impose `>=5.3.0`). Nom de série :
   24 caractères au plus (le validateur du SDK le signale).
+- **Relecture du 29/10** : semaine publiée seulement si les 7 jours sont là ; journée horaire complète seulement avec
+  tous ses créneaux (23, 24 ou 25 selon le changement d'heure) ; noms du widget coupés au milieu pour garder le sens
+  (« … NE-SO ») ; un jour « Forte » ne devient jamais le record de référence ; un record n'est oublié qu'à la
+  suppression de l'appareil (`onDeviceDeleted`), jamais sur une liste d'appareils vide ; badge de connexion en
+  erreur quand aucun portail ne répond ; réponse de 5000 lignes = erreur (coupée).
+- **Non traité, à surveiller** : un jour rattrapé après coup (antérieur à `upTo`) n'est jamais comparé au record ;
+  la règle « jour suivant présent » de Tours et des Hauts-de-Seine suppose que la publication suivante réécrit la
+  journée partielle de la veille (constaté une fois pour Tours le 29/10, à vérifier sur plusieurs jours).

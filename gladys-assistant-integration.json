@@ -538,10 +538,10 @@
           "key": "week",
           "type": "number",
           "label": {
-            "en": "Passages of the last 7 days",
-            "fr": "Passages des 7 derniers jours",
-            "de": "Durchfahrten der letzten 7 Tage",
-            "es": "Pasos de los últimos 7 días"
+            "en": "Passages of the last 7 days (0 if a day is missing)",
+            "fr": "Passages des 7 derniers jours (0 s'il manque un jour)",
+            "de": "Durchfahrten der letzten 7 Tage (0, wenn ein Tag fehlt)",
+            "es": "Pasos de los últimos 7 días (0 si falta un día)"
           }
         },
         {
@@ -552,6 +552,16 @@
             "fr": "Tendance sur la semaine d'avant (%)",
             "de": "Trend zur Vorwoche (%)",
             "es": "Tendencia frente a la semana anterior (%)"
+          }
+        },
+        {
+          "key": "trend_known",
+          "type": "number",
+          "label": {
+            "en": "Trend known (1 = yes, 0 = no)",
+            "fr": "Tendance connue (1 = oui, 0 = non)",
+            "de": "Trend bekannt (1 = ja, 0 = nein)",
+            "es": "Tendencia conocida (1 = sí, 0 = no)"
           }
         },
         {

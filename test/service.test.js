@@ -21,6 +21,7 @@ import {
   discovered,
   editRows,
   featureId,
+  urlOf,
 } from './helpers/world.js';
 
 const WILSON = 'Tours Métropole · Pont Wilson';
@@ -253,6 +254,7 @@ test('the scene action: the figures of a counter and a sentence', async (t) => {
     last_day_date: '2026-10-27',
     week: 11915,
     trend: -29,
+    trend_known: 1,
     hours_late: 0,
   });
   const unknown = await world.fake.sceneAction('get_counts', { counter: 'nope' });
@@ -276,4 +278,92 @@ test('the records are saved in /data: a restart asks the history no more', async
   t.after(() => again.app.stop());
   await cycle(again, 60 * 1000);
   assert.ok(!again.network.calls.some((c) => c.url.includes('order_by=count+desc')));
+});
+
+test('Paris without a whole week: no 7-day total, the sentence says the day alone', async (t) => {
+  const world = await createWorld({ config: { cities: ['paris'] } });
+  t.after(() => world.app.stop());
+  const bridge = await create(world, 'Pont Charles De Gaulle NE-SO');
+  // No 2026-10-25 in the source: the week is not published.
+  assert.equal(world.fake.lastState(featureId(bridge, 'week')), undefined);
+  assert.equal(world.fake.lastState(featureId(bridge, 'last_day')), 1208);
+  const ack = await world.fake.sceneAction('get_counts', { counter: bridge.external_id });
+  assert.equal(ack.data.outputs.week, 0);
+  assert.equal(ack.data.outputs.trend_known, 0);
+  assert.equal(
+    ack.data.outputs.sentence,
+    'Pont Charles De Gaulle NE-SO : 1 208 passages à vélo le 27 oct.',
+  );
+});
+
+test('the widget tells the two directions of a counter apart', async (t) => {
+  const world = await createWorld({ config: { cities: ['paris'] } });
+  t.after(() => world.app.stop());
+  await create(world, (d) => d.name === 'Paris · Pont Charles De Gaulle NE-SO');
+  await create(world, (d) => d.name === 'Paris · Pont Charles De Gaulle SO-NE');
+  const ack = await world.fake.widgetGet('counters', { settings: {}, language: 'fr' });
+  const [status, chart] = ack.data.content.components;
+  assert.deepEqual(validateWidgetContent(ack.data.content), []);
+  assert.deepEqual(
+    status.items.map((item) => item.label),
+    ['Pont Charles De Gaulle NE-SO', 'Pont Charles De Gaulle SO-NE'],
+  );
+  assert.deepEqual(
+    chart.series.map((serie) => serie.name),
+    ['Pont Charles De G… NE-SO', 'Pont Charles De G… SO-NE'],
+  );
+});
+
+test('a doubtful last day never becomes the record to beat', async (t) => {
+  const world = await createWorld({ config: { cities: ['nantes'] } });
+  t.after(() => world.app.stop());
+  editRows(world, 'nantes-days.json', (rows) =>
+    rows.map((r) =>
+      r.id === 785 && r.day === '2026-10-26' ? { ...r, count: 99999, anomaly: 'Forte' } : r,
+    ),
+  );
+  const device = await create(world, '785 - 50 Otages Vers Sud');
+  await cycle(world, 60 * 1000);
+  assert.deepEqual(world.service.store.get(device.external_id), {
+    day: '2021-08-26',
+    count: 4695,
+    upTo: '2026-10-26',
+  });
+});
+
+test('a counter removed from Gladys forgets its record', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'compteurs-velo-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const world = await createWorld({ dataDir: dir });
+  t.after(() => world.app.stop());
+  const device = await create(world, isWilson);
+  await cycle(world, 60 * 1000);
+  assert.ok(world.service.store.get(device.external_id));
+  await world.fake.deviceDeleted(device);
+  assert.equal(world.service.store.get(device.external_id), null);
+  assert.deepEqual(JSON.parse(await readFile(path.join(dir, 'records.json'), 'utf8')), {});
+});
+
+test('every portal down: the connection badge says so, then comes back', async (t) => {
+  const world = await createWorld();
+  t.after(() => world.app.stop());
+  const url = urlOf('tours-days.json');
+  const saved = world.network.routes[url];
+  world.network.routes[url] = new TypeError('fetch failed');
+  await cycle(world);
+  assert.equal(world.fake.connectionStatus.connected, false);
+  assert.match(world.fake.connectionStatus.message.fr, /Aucun portail/);
+  world.network.routes[url] = saved;
+  await cycle(world);
+  assert.equal(world.fake.connectionStatus.connected, true);
+});
+
+test('an answer cut at the row limit is an error, not missing days', async (t) => {
+  const world = await createWorld();
+  t.after(() => world.app.stop());
+  editRows(world, 'tours-days.json', (rows) =>
+    Array.from({ length: 5000 }, (_, i) => ({ ...rows[0], day: `2026-10-${i}` })),
+  );
+  await cycle(world);
+  assert.match(world.service.city('tours').error, /more than 5000 rows/);
 });

@@ -6,7 +6,15 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addDays, ageHours, dayStart, localDay, localHour, summarize } from '../src/counters.js';
+import {
+  addDays,
+  ageHours,
+  dayStart,
+  hoursIn,
+  localDay,
+  localHour,
+  summarize,
+} from '../src/counters.js';
 import { SOURCES } from '../src/sources.js';
 
 const HOUR = 3600 * 1000;
@@ -22,7 +30,7 @@ function rows(lastDay, counts, { daily = false } = {}) {
       name: 'Pont',
       day,
       count,
-      slots: 24,
+      slots: daily ? 1 : hoursIn(day),
       // The 23:00 slot in Paris, or midnight UTC for a daily source.
       last: daily ? Date.parse(`${day}T00:00:00Z`) : dayStart(addDays(day, 1)) - HOUR,
       anomaly: null,
@@ -44,7 +52,7 @@ test('French days and hours, summer time included', () => {
   assert.equal(new Date(dayStart('2026-03-29')).toISOString(), '2026-03-28T23:00:00.000Z');
 });
 
-test('an hourly source: a day is complete once its 23:00 slot is there', () => {
+test('an hourly source: a day is complete once all its slots up to 23:00 are there', () => {
   // The day before yesterday ends at 23:00, yesterday stops at 09:00.
   const data = rows('2026-10-28', [...fourteen, 50]);
   data.at(-1).last = Date.parse('2026-10-28T08:00:00Z');
@@ -60,6 +68,11 @@ test('an hourly source: a day is complete once its 23:00 slot is there', () => {
 
   data.at(-1).last = Date.parse('2026-10-28T22:00:00Z');
   assert.equal(summarize(SOURCES.saint_nazaire, data, NOW).lastDay.day, '2026-10-28');
+  // The 23:00 slot is there but an hour is missing: not complete.
+  data.at(-1).slots = 23;
+  assert.equal(summarize(SOURCES.saint_nazaire, data, NOW).lastDay.day, '2026-10-27');
+  // The clock change day has 25 hours, the spring one 23.
+  assert.deepEqual(['2026-10-25', '2026-03-29', '2026-10-28'].map(hoursIn), [25, 23, 24]);
 });
 
 test('today so far, for the sources that deliver the current day', () => {
@@ -89,11 +102,11 @@ test('a source of finished days (Nantes): its last row is complete', () => {
   assert.equal(ageHours(summary, NOW), 58);
 });
 
-test('no trend without two whole weeks, and a missing day is not invented', () => {
+test('no week nor trend without whole weeks: a missing day is not invented', () => {
   const data = rows('2026-10-27', fourteen);
   data.splice(10, 1); // 2026-10-24 missing, like Paris on the night of the clock change
   const summary = summarize(SOURCES.paris, data, NOW);
-  assert.equal(summary.week, 660);
+  assert.equal(summary.week, null);
   assert.equal(summary.trend, null);
   assert.equal(summarize(SOURCES.paris, rows('2026-10-27', [5, 6]), NOW).trend, null);
 });

@@ -85,6 +85,10 @@ function odsQueries({ id, name, count, date, area, anomaly, where }) {
         group_by: [...groups, `date_format(${date}, 'yyyy-MM-dd') as day`].join(', '),
         limit: String(MAX_GROUPS),
       });
+      // A cut answer would look like missing days: better no reading at all.
+      if (rows.length >= MAX_GROUPS) {
+        throw new Error(`${new URL(this.base).host}: more than ${MAX_GROUPS} rows`);
+      }
       return rows
         .filter((row) => row.id !== null && row.id !== undefined && row.day)
         .map((row) => ({

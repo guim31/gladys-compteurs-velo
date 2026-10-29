@@ -45,13 +45,14 @@ export const SCENE_ACTIONS = {
         last_day_date: '',
         week: 0,
         trend: 0,
+        trend_known: 0,
         hours_late: 0,
       };
     }
     const { lastDay } = summary;
     return {
       found: 1,
-      sentence: say(TEXT, language, 'sentence', {
+      sentence: say(TEXT, language, summary.week === null ? 'sentenceDay' : 'sentence', {
         name,
         count: formatCount(lastDay.count, language),
         raw: lastDay.count,
@@ -64,6 +65,7 @@ export const SCENE_ACTIONS = {
       last_day_date: lastDay.day,
       week: summary.week ?? 0,
       trend: summary.trend ?? 0,
+      trend_known: summary.trend === null ? 0 : 1,
       hours_late: Math.max(0, service.hoursLate(found.city, summary)),
     };
   },

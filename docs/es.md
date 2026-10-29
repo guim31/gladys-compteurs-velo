@@ -71,7 +71,7 @@ la hora de la última lectura, el último día completo y el último error si lo
 
 **Un día nunca se muestra antes de estar completo**: las ciudades entregan una vez al día, y el día
 que se está entregando queda fuera de «Último día completo» y «Últimos 7 días». Un día que falta en
-la fuente no se inventa: los 7 días suman entonces solo seis.
+la fuente no se inventa: no se publica entonces ningún total de 7 días hasta que la semana vuelva a estar entera (París no tiene 25 de octubre de 2026, la noche del cambio de hora). Un día horario al que le falta una hora tampoco está completo.
 
 ## Widget del panel
 
@@ -94,7 +94,7 @@ por Nantes nunca es un récord.
 ## Acción de escena
 
 **Leer las cifras de un contador de bicis**: pasos del último día completo y su fecha, de los
-últimos 7 días, la tendencia en % frente a la semana anterior (0 si se desconoce), las horas de
+últimos 7 días (0 si falta un día), la tendencia en % frente a la semana anterior (con «Tendencia conocida» a 0 cuando no se puede calcular), las horas de
 retraso, y una frase como «Pont Wilson: 1934 bicis el 27 oct, 11.915 en 7 días.». «Día completo
 conocido» vale 0 mientras el contador no tenga todavía un día completo.
 

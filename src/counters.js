@@ -4,8 +4,8 @@
 // and the end of its last data.
 //
 // A day is complete when the source has delivered all of it: a source that
-// publishes finished days only (`fullDays`), the 23:00 slot of an hourly
-// source, the day followed by a later one in a daily source (whose rows do
+// publishes finished days only (`fullDays`), every hourly slot up to 23:00
+// for an hourly source, the day followed by a later one in a daily source (whose rows do
 // not say how much of the day they hold). The day still being delivered is
 // never shown as a finished day.
 // -----------------------------------------------------------------------------
@@ -63,6 +63,9 @@ export function dayStart(day) {
   return guess - (partsOf(guess).utc - guess);
 }
 
+/** Hours in a French day: 23, 24 or 25. */
+export const hoursIn = (day) => Math.round((dayStart(nextDay(day)) - dayStart(day)) / HOUR_MS);
+
 /** Sum of the complete days within [from, to], and how many there were. */
 function sumDays(days, from, to) {
   const inside = days.filter((d) => d.complete && d.day >= from && d.day <= to);
@@ -87,7 +90,7 @@ export function summarize(source, rows, now, lastHour = null) {
       row.day < today &&
       (source.fullDays ||
         (source.step === 'hour'
-          ? row.last !== null && localHour(row.last) === 23
+          ? row.last !== null && localHour(row.last) === 23 && row.slots >= hoursIn(row.day)
           : index < sorted.length - 1)),
   }));
   const complete = days.filter((d) => d.complete);
@@ -98,7 +101,9 @@ export function summarize(source, rows, now, lastHour = null) {
   if (lastDay) {
     const current = sumDays(days, addDays(lastDay.day, -6), lastDay.day);
     const previous = sumDays(days, addDays(lastDay.day, -13), addDays(lastDay.day, -7));
-    week = current.count;
+    // Only a whole week: a missing day (Paris has no 2026-10-25) would show
+    // a week one seventh short.
+    week = current.days === 7 ? current.count : null;
     // A trend only between two whole weeks: a missing day would fake one.
     if (current.days === 7 && previous.days === 7 && previous.count > 0) {
       trend = Math.round(((current.count - previous.count) / previous.count) * 100);

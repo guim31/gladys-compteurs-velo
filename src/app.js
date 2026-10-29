@@ -72,7 +72,12 @@ export function registerHandlers(gladys, options = {}) {
     await gladys.requestWidgetRefresh?.('counters')?.catch?.(() => {});
   };
   gladys.onDeviceUpdated?.(refreshWidget);
-  gladys.onDeviceDeleted?.(refreshWidget);
+  gladys.onDeviceDeleted?.(
+    whenReady(async (device) => {
+      await service.onDeviceDeleted(device);
+      await refreshWidget();
+    }),
+  );
 
   gladys.onConfigUpdated(whenReady((newConfig) => service.reconfigure(normalizeConfig(newConfig))));
 

@@ -12,6 +12,36 @@
 import { WIDGET_COLORS } from '@gladysassistant/integration-sdk';
 import { addDays, dayStart, localDay } from './counters.js';
 import { clip } from './devices.js';
+
+/**
+ * Shortens a name in the middle, keeping its end: the direction of a Paris
+ * counter ("… NE-SO") is what tells two rows apart.
+ */
+export function clipMiddle(text, max) {
+  const value = String(text ?? '');
+  if (value.length <= max) {
+    return value;
+  }
+  const tail = value.slice(value.lastIndexOf(' ') + 1);
+  if (tail.length > max / 2) {
+    return clip(value, max);
+  }
+  return `${value.slice(0, max - tail.length - 2).trimEnd()}… ${tail}`;
+}
+
+/** Names made distinct: a repeated one gets " (2)", " (3)"… within `max`. */
+export function distinct(names, max) {
+  const seen = new Map();
+  return names.map((name) => {
+    const count = (seen.get(name) ?? 0) + 1;
+    seen.set(name, count);
+    if (count === 1) {
+      return name;
+    }
+    const suffix = ` (${count})`;
+    return `${clipMiddle(name, max - suffix.length)}${suffix}`;
+  });
+}
 import { TEXT, formatCount, formatDay, say } from './messages.js';
 
 export const MAX_ROWS = 10;
@@ -76,11 +106,15 @@ async function countersContent(service, { settings, language }) {
     const found = service.lookup(entry.deviceId);
     return { entry, city: found?.city, summary: found?.summary ?? null };
   });
+  const labels = distinct(
+    rows.map(({ entry, city }) => clipMiddle(shortName(entry, city), MAX_LABEL)),
+    MAX_LABEL,
+  );
   const components = [
     {
       type: 'status',
-      items: rows.map(({ entry, city, summary }) => ({
-        label: clip(shortName(entry, city), MAX_LABEL),
+      items: rows.map(({ city, summary }, index) => ({
+        label: labels[index],
         value: rowValue(service, city, summary, lang),
         color:
           summary?.lastDay && !service.isLate(city, summary)
@@ -89,11 +123,14 @@ async function countersContent(service, { settings, language }) {
       })),
     },
   ];
-  const series = rows
-    .filter(({ summary }) => summary?.lastDay)
-    .slice(0, MAX_SERIES)
-    .map(({ entry, city, summary }) => ({
-      name: clip(shortName(entry, city), MAX_SERIES_NAME),
+  const charted = rows.filter(({ summary }) => summary?.lastDay).slice(0, MAX_SERIES);
+  const seriesNames = distinct(
+    charted.map(({ entry, city }) => clipMiddle(shortName(entry, city), MAX_SERIES_NAME)),
+    MAX_SERIES_NAME,
+  );
+  const series = charted
+    .map(({ summary }, index) => ({
+      name: seriesNames[index],
       points: summary.days
         .filter((d) => d.complete && d.day > addDays(summary.lastDay.day, -7))
         .map((d) => ({ t: new Date(dayStart(d.day)).toISOString(), v: d.count })),

@@ -72,7 +72,7 @@ einen gibt.
 
 **Ein Tag wird nie angezeigt, bevor er vollständig ist**: die Städte liefern einmal am Tag, und der
 Tag, der gerade geliefert wird, bleibt aus „Letzter vollständiger Tag“ und „Letzte 7 Tage“ heraus.
-Ein Tag, der in der Quelle fehlt, wird nicht erfunden: die 7 Tage zählen dann nur sechs.
+Ein Tag, der in der Quelle fehlt, wird nicht erfunden: es wird dann keine 7-Tage-Summe veröffentlicht, bis die Woche wieder vollständig ist (Paris hat keinen 25. Oktober 2026, die Nacht der Zeitumstellung). Ein stündlicher Tag, dem eine Stunde fehlt, ist auch nicht vollständig.
 
 ## Dashboard-Widget
 
@@ -96,7 +96,7 @@ Nantes als zweifelhaft markiert, ist nie ein Rekord.
 ## Szenen-Aktion
 
 **Zahlen eines Fahrradzählers abrufen**: Durchfahrten des letzten vollständigen Tages und sein
-Datum, der letzten 7 Tage, der Trend in % zur Vorwoche (0, wenn unbekannt), die Stunden
+Datum, der letzten 7 Tage (0, wenn ein Tag fehlt), der Trend in % zur Vorwoche (mit „Trend bekannt“ auf 0, wenn er sich nicht berechnen lässt), die Stunden
 Verspätung, und ein Satz wie „Pont Wilson: 1.934 Fahrräder am 27. Okt., 11.915 in 7 Tagen.“.
 „Vollständiger Tag bekannt“ ist 0, solange der Zähler noch keinen vollständigen Tag hat.
 

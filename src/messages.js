@@ -12,6 +12,13 @@ export const INIT_FAILED = {
   es: 'La inicialización ha fallado, consulte los registros de la integración.',
 };
 
+export const PORTALS_DOWN = {
+  en: 'No open data portal answers, check the integration logs.',
+  fr: "Aucun portail open data ne répond, consultez les logs de l'intégration.",
+  de: 'Kein Open-Data-Portal antwortet, sieh dir die Protokolle der Integration an.',
+  es: 'Ningún portal de datos abiertos responde, consulte los registros de la integración.',
+};
+
 // Feature names, frozen when the device is created (configured language).
 export const NAMES = {
   en: {
@@ -58,6 +65,9 @@ export const formatDay = (day, language) =>
     timeZone: 'UTC',
   }).format(new Date(`${day}T12:00:00Z`));
 
+/** Ends a sentence once: "le 27 oct." already has its full stop. */
+const stop = (text) => (text.endsWith('.') ? text : `${text}.`);
+
 const plural = (count, one, many) => (count === 1 ? one : many);
 const pluralFr = (count, one, many) => (count > 1 ? many : one);
 
@@ -73,6 +83,8 @@ export const TEXT = {
     unit: 'bikes',
     sentence: ({ name, count, raw, when, week }) =>
       `${name}: ${count} ${plural(raw, 'bike', 'bikes')} ${when}, ${week} over 7 days.`,
+    sentenceDay: ({ name, count, raw, when }) =>
+      `${name}: ${count} ${plural(raw, 'bike', 'bikes')} ${stop(when)}`,
     noSentence: ({ name }) => `${name}: no complete day delivered yet.`,
     pickCounter: 'Add a counter in the Discover tab of the integration, then pick it here.',
     gone: 'This counter is no longer watched.',
@@ -87,6 +99,8 @@ export const TEXT = {
     unit: 'vélos',
     sentence: ({ name, count, raw, when, week }) =>
       `${name} : ${count} ${pluralFr(raw, 'passage', 'passages')} à vélo ${when}, ${week} sur 7 jours.`,
+    sentenceDay: ({ name, count, raw, when }) =>
+      `${name} : ${count} ${pluralFr(raw, 'passage', 'passages')} à vélo ${stop(when)}`,
     noSentence: ({ name }) => `${name} : pas encore de journée complète livrée.`,
     pickCounter:
       "Ajoutez un compteur dans l'onglet Découverte de l'intégration, puis choisissez-le ici.",
@@ -103,6 +117,8 @@ export const TEXT = {
     unit: 'Räder',
     sentence: ({ name, count, raw, when, week }) =>
       `${name}: ${count} ${plural(raw, 'Fahrrad', 'Fahrräder')} ${when}, ${week} in 7 Tagen.`,
+    sentenceDay: ({ name, count, raw, when }) =>
+      `${name}: ${count} ${plural(raw, 'Fahrrad', 'Fahrräder')} ${stop(when)}`,
     noSentence: ({ name }) => `${name}: noch kein vollständiger Tag geliefert.`,
     pickCounter: 'Füge einen Zähler im Tab „Entdecken“ der Integration hinzu und wähle ihn hier.',
     gone: 'Dieser Zähler wird nicht mehr überwacht.',
@@ -117,6 +133,8 @@ export const TEXT = {
     unit: 'bicis',
     sentence: ({ name, count, raw, when, week }) =>
       `${name}: ${count} ${plural(raw, 'bici', 'bicis')} ${when}, ${week} en 7 días.`,
+    sentenceDay: ({ name, count, raw, when }) =>
+      `${name}: ${count} ${plural(raw, 'bici', 'bicis')} ${stop(when)}`,
     noSentence: ({ name }) => `${name}: aún no se ha entregado un día completo.`,
     pickCounter:
       'Añada un contador en la pestaña Descubrir de la integración y luego elíjalo aquí.',

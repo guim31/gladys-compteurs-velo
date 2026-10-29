@@ -69,7 +69,7 @@ time of the last reading, the last complete day and the last error if any.
 
 **A day is never shown before it is complete**: the cities deliver once a day, and the day being
 delivered stays out of "Last complete day" and "Last 7 days". A day missing from the source is not
-invented: the 7 days then add up to six.
+invented: then no 7-day figure is published until the week is whole again (Paris has no 25 October 2026, the night of the clock change). An hourly day missing one of its hours is not complete either.
 
 ## Dashboard widget
 
@@ -91,7 +91,7 @@ and its day; the data age for a late counter. A day flagged as doubtful by Nante
 ## Scene action
 
 **Get the figures of a bike counter**: passages of the last complete day and its date, of the last
-7 days, the trend in % against the week before (0 when unknown), the hours late, and a sentence
+7 days (0 when a day is missing), the trend in % against the week before (with "Trend known" at 0 when it cannot be computed), the hours late, and a sentence
 such as "Pont Wilson: 1,934 bikes on 27 Oct, 11,915 over 7 days.". "Complete day known" is 0 while
 the counter has no complete day yet.
 

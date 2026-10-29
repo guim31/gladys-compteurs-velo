@@ -49,16 +49,12 @@ export class RecordStore {
     await this.save();
   }
 
-  /** Forgets the counters no longer watched. */
-  async keep(ids) {
-    const wanted = new Set(ids);
-    const stale = Object.keys(this.records).filter((id) => !wanted.has(id));
-    if (stale.length === 0) {
+  /** Forgets a counter removed from Gladys. */
+  async forget(id) {
+    if (!(id in this.records)) {
       return;
     }
-    for (const id of stale) {
-      delete this.records[id];
-    }
+    delete this.records[id];
     await this.save();
   }
 

@@ -20,7 +20,7 @@ import {
   counterStates,
   prettyName,
 } from './devices.js';
-import { REPORTS, lines, render } from './messages.js';
+import { PORTALS_DOWN, REPORTS, lines, render } from './messages.js';
 import { SOURCES, SOURCE_KEYS } from './sources.js';
 import { RecordStore } from './store.js';
 
@@ -85,6 +85,7 @@ export class BikeCounters {
     this.publishFailed = false;
     this.discoveryFailed = false;
     this.fireFailed = false;
+    this.down = false;
     this.timer = null;
     this.stopped = false;
     this.refreshing = null;
@@ -340,7 +341,29 @@ export class BikeCounters {
     for (const { key, data } of events) {
       await this.fire(key, data);
     }
-    await this.store.keep(watched.map((entry) => entry.deviceId));
+    await this.reportConnection();
+  }
+
+  /**
+   * The connection badge of the Configuration tab: down when not one of the
+   * cities read answers, back as soon as one does.
+   */
+  async reportConnection() {
+    const read = this.activeKeys().map((key) => this.city(key));
+    const down = read.length > 0 && read.every((city) => city.error);
+    if (down === this.down) {
+      return;
+    }
+    this.down = down;
+    await this.gladys.setConnectionStatus(!down, down ? PORTALS_DOWN : undefined).catch(() => {});
+  }
+
+  /** A device removed from Gladys: its record goes too (a new one starts afresh). */
+  async onDeviceDeleted(device) {
+    if (device?.external_id) {
+      this.lateness.delete(device.external_id);
+      await this.store.forget(device.external_id);
+    }
   }
 
   /** Reads a city; a failure is logged once, until it works again. */
@@ -420,8 +443,14 @@ export class BikeCounters {
     if (!saved) {
       try {
         const best = await city.source.record(this.fetch, counterId, lastDay.day);
+        // The best day includes the last one, unless the source doubts it:
+        // a doubtful day never becomes the record to beat.
         const record =
-          best && best.count >= lastDay.count ? best : { day: lastDay.day, count: lastDay.count };
+          best && (best.count >= lastDay.count || lastDay.anomaly === 'Forte')
+            ? best
+            : lastDay.anomaly === 'Forte'
+              ? { day: lastDay.day, count: 0 }
+              : { day: lastDay.day, count: lastDay.count };
         await this.store.set(deviceId, { ...record, upTo: lastDay.day });
       } catch (err) {
         logger.debug(`${city.source.name}: record of ${counterId} unavailable: ${err.message}`);

@@ -70,7 +70,7 @@ l'heure de la dernière lecture, la dernière journée complète et la dernière
 
 **Une journée n'est jamais montrée avant d'être complète** : les villes livrent une fois par jour,
 et le jour en cours de livraison reste hors de « Dernière journée complète » et « 7 derniers
-jours ». Un jour absent de la source n'est pas inventé : les 7 jours n'en comptent alors que six.
+jours ». Un jour absent de la source n'est pas inventé : aucun total sur 7 jours n'est alors publié tant que la semaine n'est pas de nouveau entière (Paris n'a pas de 25 octobre 2026, nuit du changement d'heure). Une journée horaire à laquelle il manque une heure n'est pas complète non plus.
 
 ## Widget du tableau de bord
 
@@ -93,7 +93,7 @@ douteux par Nantes n'est jamais un record.
 ## Action de scène
 
 **Lire les chiffres d'un compteur vélo** : passages de la dernière journée complète et sa date, des
-7 derniers jours, la tendance en % sur la semaine d'avant (0 si inconnue), les heures de retard, et
+7 derniers jours (0 s'il manque un jour), la tendance en % sur la semaine d'avant (avec « Tendance connue » à 0 quand elle ne peut pas être calculée), les heures de retard, et
 une phrase comme « Pont Wilson : 1 934 passages à vélo le 27 oct., 11 915 sur 7 jours. ».
 « Journée complète connue » vaut 0 tant que le compteur n'a pas encore de journée complète.
 
