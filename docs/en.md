@@ -69,7 +69,7 @@ time of the last reading, the last complete day and the last error if any.
 
 **A day is never shown before it is complete**: the cities deliver once a day, and the day being
 delivered stays out of "Last complete day" and "Last 7 days". A day missing from the source is not
-invented: then no 7-day figure is published until the week is whole again (Paris has no 25 October 2026, the night of the clock change). An hourly day missing one of its hours is not complete either.
+invented: then no 7-day figure is published until the week is whole again (Paris has no 25 October 2026, the night of the clock change). An hourly day missing one of its hours is not complete either. Meanwhile the feature keeps its last whole-week value.
 
 ## Dashboard widget
 

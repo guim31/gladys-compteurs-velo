@@ -304,3 +304,5 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - **Non traité, à surveiller** : un jour rattrapé après coup (antérieur à `upTo`) n'est jamais comparé au record ;
   la règle « jour suivant présent » de Tours et des Hauts-de-Seine suppose que la publication suivante réécrit la
   journée partielle de la veille (constaté une fois pour Tours le 29/10, à vérifier sur plusieurs jours).
+- « 7 derniers jours » garde sa dernière valeur entière tant qu'un jour manque ; un appareil supprimé pendant que
+  l'intégration est arrêtée garde son record (et peut redéclencher au ré-ajout).

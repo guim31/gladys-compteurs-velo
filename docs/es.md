@@ -71,7 +71,7 @@ la hora de la última lectura, el último día completo y el último error si lo
 
 **Un día nunca se muestra antes de estar completo**: las ciudades entregan una vez al día, y el día
 que se está entregando queda fuera de «Último día completo» y «Últimos 7 días». Un día que falta en
-la fuente no se inventa: no se publica entonces ningún total de 7 días hasta que la semana vuelva a estar entera (París no tiene 25 de octubre de 2026, la noche del cambio de hora). Un día horario al que le falta una hora tampoco está completo.
+la fuente no se inventa: no se publica entonces ningún total de 7 días hasta que la semana vuelva a estar entera (París no tiene 25 de octubre de 2026, la noche del cambio de hora). Un día horario al que le falta una hora tampoco está completo. Mientras tanto, la función conserva su último valor de una semana entera.
 
 ## Widget del panel
 

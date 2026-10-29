@@ -110,6 +110,8 @@ export class BikeCounters {
   async resync(config) {
     this.config = config;
     this.gladys.forgetPublishedStates?.();
+    // A restarted Gladys knows no status: said again if still down.
+    this.down = false;
     await this.refresh({ discover: true });
   }
 
@@ -354,8 +356,13 @@ export class BikeCounters {
     if (down === this.down) {
       return;
     }
-    this.down = down;
-    await this.gladys.setConnectionStatus(!down, down ? PORTALS_DOWN : undefined).catch(() => {});
+    try {
+      await this.gladys.setConnectionStatus(!down, down ? PORTALS_DOWN : undefined);
+      // Kept only once Gladys has it: a failed call is tried again next time.
+      this.down = down;
+    } catch {
+      // Gladys restarting: the next refresh says it again.
+    }
   }
 
   /** A device removed from Gladys: its record goes too (a new one starts afresh). */

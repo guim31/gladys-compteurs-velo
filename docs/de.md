@@ -72,7 +72,7 @@ einen gibt.
 
 **Ein Tag wird nie angezeigt, bevor er vollständig ist**: die Städte liefern einmal am Tag, und der
 Tag, der gerade geliefert wird, bleibt aus „Letzter vollständiger Tag“ und „Letzte 7 Tage“ heraus.
-Ein Tag, der in der Quelle fehlt, wird nicht erfunden: es wird dann keine 7-Tage-Summe veröffentlicht, bis die Woche wieder vollständig ist (Paris hat keinen 25. Oktober 2026, die Nacht der Zeitumstellung). Ein stündlicher Tag, dem eine Stunde fehlt, ist auch nicht vollständig.
+Ein Tag, der in der Quelle fehlt, wird nicht erfunden: es wird dann keine 7-Tage-Summe veröffentlicht, bis die Woche wieder vollständig ist (Paris hat keinen 25. Oktober 2026, die Nacht der Zeitumstellung). Ein stündlicher Tag, dem eine Stunde fehlt, ist auch nicht vollständig. Bis dahin behält die Funktion ihren letzten Wert einer vollständigen Woche.
 
 ## Dashboard-Widget
 

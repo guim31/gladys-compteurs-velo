@@ -70,7 +70,7 @@ l'heure de la dernière lecture, la dernière journée complète et la dernière
 
 **Une journée n'est jamais montrée avant d'être complète** : les villes livrent une fois par jour,
 et le jour en cours de livraison reste hors de « Dernière journée complète » et « 7 derniers
-jours ». Un jour absent de la source n'est pas inventé : aucun total sur 7 jours n'est alors publié tant que la semaine n'est pas de nouveau entière (Paris n'a pas de 25 octobre 2026, nuit du changement d'heure). Une journée horaire à laquelle il manque une heure n'est pas complète non plus.
+jours ». Un jour absent de la source n'est pas inventé : aucun total sur 7 jours n'est alors publié tant que la semaine n'est pas de nouveau entière (Paris n'a pas de 25 octobre 2026, nuit du changement d'heure). Une journée horaire à laquelle il manque une heure n'est pas complète non plus. En attendant, la fonctionnalité garde sa dernière valeur sur une semaine entière.
 
 ## Widget du tableau de bord
 
