@@ -2,3 +2,5 @@ node_modules/
 package-lock.json
 /data/
 *.log
+# Real answers of the portals, kept as captured (one line each).
+test/fixtures/sources/

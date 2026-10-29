@@ -31,16 +31,23 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+index.js                          SDK wiring only: registerHandlers() then connect()
+src/app.js                        every SDK handler -> service; configuration action
+src/service.js                    cities read, timer, discovery, states, records, triggers, status
+src/sources.js                    one Opendatasoft dataset per city, three aggregated queries
+src/counters.js                   daily rows -> complete days, week, trend, today, age (French days)
+src/devices.js                    the Gladys device of a counter, its states
+src/store.js                      /data/records.json: best day of each watched counter
+src/scenes.js                     scene action handler (manifest `scene_actions`)
+src/widgets.js                    dashboard widget handler (manifest `widgets`)
+src/http.js                       downloads: timeouts, size caps
+src/messages.js                   texts sent from the container (en, fr, de, es)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
+gladys-assistant-integration.json manifest: config, action, widget, scene triggers and action
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (en and fr mandatory)
 test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+test/helpers/world.js             fake Gladys + fake fetch on the fixtures + manual clock
+test/fixtures/sources             real answers of the five portals (2026-10-29), index.json = URL -> file
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -250,3 +257,52 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+# Intégration Compteurs vélo (notes de développement, 29/10/2026)
+
+## Sources vérifiées en direct (29/10/2026, vers 1 h 50)
+
+| Clé              | Jeu Opendatasoft                                                                             | Pas                                               | Publication observée                                              |
+| ---------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
+| `paris`          | opendata.paris.fr `comptage-velo-donnees-compteurs` (13 mois glissants)                      | heure                                             | ~8 h, jusqu'à 23 h la veille                                      |
+| `nantes`         | data.nantesmetropole.fr `244400404_comptages-velo-nantes-metropole`                          | jour (24 colonnes horaires + `total`)             | ~9 h, jusqu'à J-2                                                 |
+| `tours`          | data.tours-metropole.fr `comptage-velo-donnees-compteurs-syndicat-des-mobilites-de-touraine` | jour (15 min, 60 min ou 1 jour selon le compteur) | ~12 h, avec le jour en cours partiel                              |
+| `saint_nazaire`  | data.saintnazaireagglo.fr `ex-vue-personnalisee-comptage-velo-et-pedestre-donnees-compteurs` | heure                                             | ~10 h 30, jusqu'à 9 h le jour même                                |
+| `hauts_de_seine` | opendata.hauts-de-seine.fr `fr-229200506-comptages-velos-pas-journalier`                     | jour                                              | ~0 h 30, avec la journée qui vient de finir (peut-être partielle) |
+
+Écartées : **Toulouse** (`comptage-velo-eco-counter`, figé au 26/06/2025, les autres jeux sont annuels),
+**Rennes** (`eco-counter-data`, figé au 06/07/2026), **Montpellier** (API en 503 / « accès refusé »), **Lille**,
+**Angers**, **Brest** (annuel ou campagnes), **Anglet** (un jeu par année : `…-2026`, à gérer au 1er janvier).
+
+## Choix et pièges
+
+- **Requêtes agrégées** (`group_by` + `date_format(date, 'yyyy-MM-dd')` + `timezone=Europe/Paris`) : une seule
+  requête par ville pour 17 jours de tous les compteurs, sans pages de 100 (un `group_by` accepte `limit` jusqu'à
+  plusieurs milliers). Un champ `geo_point_2d` ne peut pas entrer dans un `group_by`.
+- `max(date)` revient en UTC, une ligne du `select` simple revient avec le décalage de `timezone` : `Date.parse`
+  gère les deux.
+- **Journée complète** : créneau 23 h (heure de Paris) présent pour une source horaire ; jour suivant présent pour
+  une source journalière (Tours et les Hauts-de-Seine livrent des journées partielles) ; toute ligne à Nantes. Le
+  jour en cours n'est jamais complet. Paris n'a **pas de 25/10/2026** (nuit du changement d'heure) : un jour absent
+  n'est pas inventé, la tendance n'est calculée qu'entre deux semaines entières.
+- `Boucle_num` de Nantes est un entier, comparé à une chaîne dans le `where` : Opendatasoft l'accepte.
+- Nantes signale ses jours douteux (`probabilite_presence_anomalie` = « Forte ») : jamais de record ce jour-là,
+  ni dans l'historique (clause du `where`).
+- Saint-Nazaire : garder `travel_modes = "vélo"` seul (les compteurs mixtes additionnent piétons et cyclistes).
+- **Record** : à la première lecture d'un compteur suivi, meilleure journée de l'historique jusqu'à sa dernière
+  journée complète, sans événement ; ensuite chaque nouvelle journée complète est comparée. Gardé dans
+  `/data/records.json` (`upTo` = dernier jour déjà comparé) pour ne pas redéclencher au redémarrage.
+- **Retard** : âge de la donnée moins `usualAgeHours` de la source ; seuils 12 / 24 / 72 / 168 h, un événement
+  par seuil franchi, jamais au premier passage (référence).
+- Le widget utilise un `chart` : `gladys_version >=5.2.0` (et `countries` impose `>=5.3.0`). Nom de série :
+  24 caractères au plus (le validateur du SDK le signale).
+- **Relecture du 29/10** : semaine publiée seulement si les 7 jours sont là ; journée horaire complète seulement avec
+  tous ses créneaux (23, 24 ou 25 selon le changement d'heure) ; noms du widget coupés au milieu pour garder le sens
+  (« … NE-SO ») ; un jour « Forte » ne devient jamais le record de référence ; un record n'est oublié qu'à la
+  suppression de l'appareil (`onDeviceDeleted`), jamais sur une liste d'appareils vide ; badge de connexion en
+  erreur quand aucun portail ne répond ; réponse de 5000 lignes = erreur (coupée).
+- **Non traité, à surveiller** : un jour rattrapé après coup (antérieur à `upTo`) n'est jamais comparé au record ;
+  la règle « jour suivant présent » de Tours et des Hauts-de-Seine suppose que la publication suivante réécrit la
+  journée partielle de la veille (constaté une fois pour Tours le 29/10, à vérifier sur plusieurs jours).
+- « 7 derniers jours » garde sa dernière valeur entière tant qu'un jour manque ; un appareil supprimé pendant que
+  l'intégration est arrêtée garde son record (et peut redéclencher au ré-ajout).

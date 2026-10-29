@@ -1,61 +1,142 @@
-# Demo Devices Template
+# Bike counters
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+The **bike counters** that French cities publish in open data, in Gladys: how many cyclists rode
+past "your" counter yesterday, over the last 7 days, and whether it was a record. Paris, Nantes
+Métropole, Tours Métropole, the Saint-Nazaire area and the departmental roads of Hauts-de-Seine.
+**No account, no key.**
+
+Unofficial integration, not affiliated with the cities, Eco-Counter or the counter operators. No
+hardware involved: the five sources were checked live on 2026-10-29, feedback is welcome.
 
 ## What you get
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+- One **device per counter** you add (per direction when the city separates them): passages of
+  the last complete day, of the last 7 days, of today so far and of the last hour available
+  (depending on the city), and the age of the data.
+- A **widget** "Bike counters": your counters on one row each (last complete day and trend over a
+  week), with a 7-day chart.
+- Two **scene triggers**: daily record beaten, counter data late.
+- A **scene action**: the figures of a counter, with a sentence ready to send or to speak.
+
+## Requirements
+
+- Gladys Assistant **5.3.0** or later.
+- Internet access from Gladys: the data comes from the open data portals of the cities.
+- No account, no API key.
+
+## Installation
+
+1. In Gladys, open **Integrations → Install from GitHub**.
+2. Paste the address `https://github.com/guim31/gladys-compteurs-velo` and confirm.
+3. Open the integration once installed: the **Configuration** tab shows.
 
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+### Settings
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+| Setting               | Effect                                                            |
+| --------------------- | ----------------------------------------------------------------- |
+| Cities                | the cities whose counters are offered in the Discover tab         |
+| Language of the names | language of the feature names and of the scene sentences (French) |
+| Reading interval      | every 30 minutes, every hour (default) or every 3 hours           |
 
-## Actions
+Feature names are fixed when a device is added: pick the language first.
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+### Add counters
 
-## Scenes
+1. Tick one or more cities, then save.
+2. Open the **Discover** tab: every counter of those cities with data in the last 17 days shows
+   there, as "City · Counter".
+3. Add the ones you want to Gladys. Their values arrive at once.
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+The counters added are the **watched counters**: the widget, the triggers and the scene action
+offer them. A counter added stays read even if you untick its city afterwards.
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+### Check
 
-## Dashboard
+The **Status** action of the Configuration tab lists the cities read, their number of counters, the
+time of the last reading, the last complete day and the last error if any.
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+## Devices
+
+| Feature             | Meaning                                                                | Cities               |
+| ------------------- | ---------------------------------------------------------------------- | -------------------- |
+| Last complete day   | passages of the last day the city has delivered in full                | all                  |
+| Last 7 days         | passages of the 7 days ending with the last complete day               | all                  |
+| Today so far        | passages of the current day already delivered (0 until the first data) | Tours, Saint-Nazaire |
+| Last hour available | passages of the last hour delivered                                    | Paris, Saint-Nazaire |
+| Data age            | hours since the end of the last data                                   | all                  |
+
+**A day is never shown before it is complete**: the cities deliver once a day, and the day being
+delivered stays out of "Last complete day" and "Last 7 days". A day missing from the source is not
+invented: then no 7-day figure is published until the week is whole again (Paris has no 25 October 2026, the night of the clock change). An hourly day missing one of its hours is not complete either. Meanwhile the feature keeps its last whole-week value.
+
+## Dashboard widget
+
+"Bike counters": one row per counter (10 at most), with the passages of the last complete day,
+"yesterday" or its date, and the trend against the week before ("↗ 12 %"). Grey when the data is
+late. Below, a chart of the last 7 complete days of the first four counters; a setting hides it.
+The widget shows the names you gave in Gladys.
+
+## Scene triggers
+
+| Trigger             | Fires when                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| Daily record beaten | a new complete day beats the best day of the counter (history kept by the city)    |
+| Counter data late   | the data is 12 h, 1 day, 3 days or 1 week late, beyond the usual delay of the city |
+
+Both can be limited to some counters. Variables: counter, city, passages and day, previous record
+and its day; the data age for a late counter. A day flagged as doubtful by Nantes is never a record.
+
+## Scene action
+
+**Get the figures of a bike counter**: passages of the last complete day and its date, of the last
+7 days (0 when a day is missing), the trend in % against the week before (with "Trend known" at 0 when it cannot be computed), the hours late, and a sentence
+such as "Pont Wilson: 1,934 bikes on 27 Oct, 11,915 over 7 days.". "Complete day known" is 0 while
+the counter has no complete day yet.
+
+## Scene examples
+
+- Every morning at 9: get the figures of your counter, then send the sentence by Telegram.
+- Daily record beaten: send a message with the counter and its passages (scene variables).
+- Counter data late by 3 days: send a message, the counter is probably broken.
+
+## Data and refresh
+
+| City             | Portal                                    | Step | Published                                            |
+| ---------------- | ----------------------------------------- | ---- | ---------------------------------------------------- |
+| Paris            | opendata.paris.fr (Opendatasoft)          | hour | every morning, up to the day before                  |
+| Nantes Métropole | data.nantesmetropole.fr (Opendatasoft)    | day  | every morning, two days late                         |
+| Tours Métropole  | data.tours-metropole.fr (Opendatasoft)    | day  | late morning, with the day so far                    |
+| Saint-Nazaire    | data.saintnazaireagglo.fr (Opendatasoft)  | hour | every morning, up to that morning                    |
+| Hauts-de-Seine   | opendata.hauts-de-seine.fr (Opendatasoft) | day  | every night; a day counts once the next one is there |
+
+So the "Last complete day" is usually yesterday (Paris, Tours, Saint-Nazaire), the day before
+yesterday (Hauts-de-Seine) or three days ago (Nantes). One aggregated request per city and per
+reading (one more for the last hour in Paris and Saint-Nazaire), and once per counter added the
+best day of its history, then kept in `/data`. At one reading an hour this is a few dozen requests
+a day, far below the quotas of the portals for anonymous use.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- **No counter in Discover**: check that a city is ticked and saved, then run the **Status**
+  action. An "HTTP 503" or "timeout" error comes from the portal of the city: try again later.
+- **The values do not change today**: normal, the cities publish once a day.
+- **A grey row in the widget**: the data of this counter is late (broken counter or city late).
+- For more details, set `LOG_LEVEL=debug`: every reading is then logged.
+
+## Limitations
+
+- **Toulouse** stopped updating its Eco-Counter dataset in June 2025; **Rennes** in July 2026;
+  **Montpellier** was down during the tests; **Lille**, **Angers** and **Brest** publish yearly or
+  campaign figures only; **Anglet** changes its dataset every year. They can be added once a daily
+  feed exists.
+- Figures as published by the cities (raw Eco-Counter counts, sometimes corrected later).
+- Read only.
+
+## Credits
+
+- Data: Ville de Paris, Nantes Métropole, Syndicat des Mobilités de Touraine, Saint-Nazaire agglo
+  – La CARENE and Département des Hauts-de-Seine, under their open licences (ODbL / Licence
+  Ouverte).
+- Built from the official Gladys integration template.

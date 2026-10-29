@@ -30,6 +30,17 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+What the integration handles:
+
+- **No secret**: the open data portals it reads need no account and no key.
+- **Stored in `/data`**: `records.json`, the best day of each counter added
+  (date and number of passages, public data). The cities chosen live in the
+  Gladys configuration, the last readings in memory only.
+- **Network**: outgoing HTTPS requests only, to the open data portals of the
+  cities (opendata.paris.fr, data.nantesmetropole.fr, data.tours-metropole.fr,
+  data.saintnazaireagglo.fr, opendata.hauts-de-seine.fr), with a timeout and a
+  size cap on every answer. No port is opened.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+and the open data portals the integration reads.
